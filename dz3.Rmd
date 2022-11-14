@@ -1,0 +1,70 @@
+---
+title: "Treća domaća zadaća"
+author: "Ivana Tus"
+date: "2022-11-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+setwd("~/Desktop/UZnL")
+```
+
+## 1. zadatak
+
+U ovom zadatku, bilo je potrebno preuzeti podatke sa stranice https://github.com/owid/covid-19-data/tree/master/public/data u obliku CSV datoteke te provedba osnovne statističke analize nad njom. Datoteka je učitana u program kao programski okvir covid_data te koji je potom filtritan dva puta: prvi put na podatke za Republiku Hrvatsku te drugi put na podatke vezane samo za 2022. godinu. Takav filtriran set podataka spremljen je u programski okvir cro_data te je nastavljena statistička analiza njega. Prvo su ispisani kvartili te potom standardna devijacija i aritmetička sredina. Potom je set podataka grafički prikazan prvo razdiobom samog broja pacijenata po danima, potom kutijastim dijagramom (kvantili) te za kraj funkcijom gustoće vjerojatnosti.
+```{r prvi}
+#ucitavanje csv datoteke u prog okvir
+covid_data <- read.csv("owid-covid-data.csv", header = TRUE, sep = ',')
+
+#filtritanje podataka vezanih za HRV, potrebna knjižica dplyr
+cro_data <- dplyr::filter(covid_data, iso_code=="HRV")
+#filtritanje podataka vezane za 2022. godinu pomoću parcijalnog podudaranja stringova
+cro_data <- cro_data[grep("2022", cro_data$date), ]
+
+print(summary(cro_data$hosp_patients)) #ispis kvartila
+print(sd(na.omit(cro_data$hosp_patients))) #ispis standardne devijacije
+print(mean(na.omit(cro_data$hosp_patients))) #ispis aritmetičke sredine podataka
+
+plot(cro_data$hosp_patients, xlab = 'Broj pacijenata', ylab ='Broj dana', main = 'Razdioba podataka u varijabli hosp_patiens')
+
+#boxplot dijagram
+boxplot(cro_data$hosp_patients, main = 'Box-plot diagram', xlab ='Sunspot number', ylab='quartiles')
+
+#funkcija gustoće
+plot(density(na.omit(cro_data$hosp_patients)), main = 'Funkcija gustoće vjerojatnosti', xlab = 'x', ylab = 'y')
+```
+Pri analizi podataka možemo primijetiti da je broj hospitaliziranih pacijenata varirao, s najvećim brojem hospitalizacija u početnom dijelu godine. Standardna devijacija je također vrlo velika zbog velike razlike u broju hospitalizacija početkom godine i tokom ljeta.
+
+## 2. zadatak
+
+U ovom zadatku potrebno je odrediti vrijednost kumulativne vjerojatnosti te gustoću vjerojatnosti opažanja 0.3 ukoliko uzorak prati normalnu razdiobu s parametrima N(0,1).
+
+```{r drugi}
+pnorm(0.3, 0, 1) #funkcija kumulativne vjerojatnosti
+dnorm(0.3, 0, 1) #funkcija gustoće vjerojatnosti razdiobe
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## 3. zadatak
+Zadatak nalaže generiranje uzorka od 100 opažanja s Gama razdiobom. Zadani parametri su standardna devijacija (sd = 2) i aritmetička srednja vrijednost (avg = 2), no Gama razdioba se oslanja na parametre α i β. Uz pomoć formula avg = α * β i sd = α * β<sup>2</sup> na sljedeći način:
+
+α * β = 2
+
+α = 2/β
+
+α * β<sup>2</sup> = 2
+
+2/β * β<sup>2</sup> = 2 /:2
+
+β = 1
+
+α = 2.
+
+Sada možemo generirati opažanja te ih grafički prikazati histogramom pomoću sljedećeg koda:
+```{r treci}
+y <- rgamma (100, 2)
+hist(y, xlab='x', ylab='frekvencija', main='Slučajna opažanja')
+```
