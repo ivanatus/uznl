@@ -1,0 +1,46 @@
+---
+librRtitle: "DZ 2"
+author: "Ivana Tus"
+date: "2022-10-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Druga domaća zadaća
+
+U ovoj domaćoj zadaći bilo je potrebno grafički prikazati digitalnu kartu te označiti centar Zagreba, Rijeke, Splita i Osijeka te omiljenog mjesta u Republici Hrvatskoj pomoću knjižice leaflat na pozadini baze podataka OpenStreetMap. Koordinate su dobivene putem https://www.mapdevelopers.com/geocode_tool.php (kao i u skripti povezanoj s posljednjim laboratorijskim vježbama).
+
+```{r dz2}
+#piprema okruženja i radnog direktorija
+rm(list = ls())
+setwd("~/Desktop/UznL")
+
+#poziv korištenih knjižica
+library(sp)
+library(sf)
+library(rgdal)
+library(raster)
+library(leaflet)
+
+#upis koordinata u podatkovni okvir pomoću kojega će se stvoriti potrebne oznake
+longitude <- c(14.4394761, 15.9667, 18.6753283, 16.43915, 15.2289292)
+latitude <- c(45.3276987,45.7333, 45.5551685, 43.50891, 44.337465)
+stations <- as.data.frame(cbind(longitude, latitude))
+
+#kreiranje prostornih podataka iz podatkovnog okvira stations
+pts <- SpatialPoints(stations)
+class(pts)
+showDefault(pts)
+crdref <- CRS('+proj=longlat +datum=WGS84')
+pts <- SpatialPoints(stations, proj4string = crdref)
+
+#kreiranje i prikaz digitalne karte s oznakama
+map.point <- leaflet() %>%
+  addTiles() %>%  # Koristena osnovna OSM podloga
+  addMarkers(lng=stations$longitude, lat=stations$latitude)
+map.point
+
+```
