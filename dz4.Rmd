@@ -1,0 +1,73 @@
+---
+title: "Domaća zadaća 4"
+author: "Ivana Tus"
+date: "2022-11-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+setwd("~/Desktop/UZnL")
+```
+U ovoj zadaći bilo je potrebno provesti i interpretirati različite statističke testove nad podacima iz datoteke rec.csv. Za početak učitamo csv datoteku kao programski okvir kako bismo mogli manipulirati podacima. U ovom dijelu pokazujemo različite grafičke prikaze podataka.
+```{r graphics}
+#učitavanje podataka u programski okvir
+dz4_data <- read.csv("rec.csv", header = TRUE)
+
+#prikaz prave razdiobe podataka u varijablama nerr i eerr
+plot(dz4_data$nerr, xlab = 'x', ylab ='y', main = 'Razdioba podataka u varijabli nerr')
+plot(dz4_data$eerr, xlab = 'x', ylab ='y', main = 'Razdioba podataka u varijabli eerr')
+
+#prikaz kvantila pomoću kutijastog dijagrama
+boxplot(dz4_data$nerr, main='Kutijasti dijagram za nerr', xlab='x', ylab='y')
+boxplot(dz4_data$eerr, main='Kutijasti dijagram za eer', xlab='x', ylab='y')
+
+#histogram razdiobe podataka
+hist(dz4_data$nerr, xlab = 'x', ylab = 'y', main = 'Histogram za nerr')
+hist(dz4_data$eerr, xlab = 'x', ylab = 'y', main = 'Histogram za eer')
+
+#prikaz eksperimentalne funkcije gustoće vjerojatnosti
+plot(density(dz4_data$nerr), main = '', xlab = 'x', ylab = 'y')
+plot(density(dz4_data$eerr), main = '', xlab = 'x', ylab = 'y')
+```
+
+Potom ispisujemo eksplorativnu statističku analizu (summary, hrv. sažetak) i standardnu devijaciju podataka.
+```{r basics}
+#standardna devijacija
+print(sd(dz4_data$nerr))
+print(sd(dz4_data$eerr))
+
+#eksploraativna statističa analiza
+print(summary(dz4_data$nerr))
+print(summary(dz4_data$eerr))
+```
+
+Nakon toga krećemo s rarzličitim statističkim testovima. Prvi je na redu Shapiro-Wilk test koji provjerava je li se razdioba podataka došla iz normalne (Gaussove) razdiobe. Početna hipoteza (H0) ovog testa jest da je to istina.
+
+```{r sw.test}
+print(shapiro.test(dz4_data$nerr))
+print(shapiro.test(dz4_data$eerr))
+```
+S obzirom da je p-value manji od 0.05 u oba slučaja, možemo odbaciti početnu hipotezu za obje varijable.
+
+
+Sljedeći test je Kolmogorov-Smirnov test. Ovo je neparametarski test koji provjerava prate li podaci zadanu (u ovom slučaju normalnu) razdiobu te je početna hipoteza (H0) da prate.
+```{r ks.test}
+print(ks.test(dz4_data$nerr, 'pnorm'))
+print(ks.test(dz4_data$eerr, 'pnorm'))
+```
+U oba slučaja je p-value manja od 0.05, stoga se početna hipoteza može odbaciti za oba slučaja.
+
+T test kao početnu hipotezu (H0) uzima da je razlika između dvaju uzoraka jednaka 0.
+```{r t.test}
+print(t.test(dz4_data$nerr, dz4_data$eerr))
+```
+S obzirom da je p-value manji od 0.05 te su izračunate srednje vrijednosti dviju varijabla različite, možemo odbaciti početnu hipotezu.
+
+
+Var test kao početnu hipotezu (H0) uzima pretpostavku da je omjer varijanci dvaju uzoraka 1.
+```{r var.test}
+print(var.test(dz4_data$nerr, dz4_data$eerr))
+```
+Vidimo da je p-value manji od 0.05 te da je pravi omjer varijanci 1.505425, stoga odbacujemo početnu hipotezu.
