@@ -1,0 +1,61 @@
+---
+title: "Sedma domaća zadaća"
+author: "Ivana Tus"
+date: "2023-01-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+setwd("~/Desktop/UZnL")
+library(sp)
+library(spdep)
+library(raster)
+library(stringr)
+options(encoding = "UTF-8")
+```
+
+## Opis zadatka
+
+Zadatak ove domaće zadaće bio je kreirati CSV tablicu sa županijama RH-a te njihovom geografskom širinom i dužinom i BDP-om u 2015. godini te potom razviti programsku podršku za proračun Moranovog i koeficijenta.
+
+```{r priprema}
+#učitavanje i provjera podataka o BDP-u
+dz7data <- read.csv("dz7data.csv", header = TRUE, sep = ',')
+#print(dz7data)
+
+#preuzimanje i provjera prostornih podataka županija pomoću GADM alata
+zupanije <- raster::getData('GADM', country='HRV', level=1)
+#print(zupanije$NAME_1)
+
+#spajanje podataka iz programskog okvira o BDP-u s prostornim podatcima svake županije
+zupanije@data <- merge(zupanije@data, dz7data, by="NAME_1", all.x = TRUE)
+#print(zupanije@data)
+
+#stvaranje liste susjeda koja se korisi u izračunu Moranovog koeficijenta
+neighbours <- poly2nb(zupanije, queen = FALSE)
+nb_list <- nb2listw(neighbours, style="W", zero.policy = TRUE)
+```
+
+### Izravan proračun pomoću instrukcije moran()
+
+```{r moran 1}
+I <- moran(zupanije$BDP, nb_list, length(neighbours), Szero(nb_list))[1]
+print(I)
+```
+#### Interpretacija
+S obzirom da je vrijednost koeficijenta blizu nule, može se zaključiti da je hipoteza da je BDP prostorno "nasumično" raspoređen kroz središta Hrvatskih županija točna.
+
+
+### Proračun Monte-Carlo simulacijom
+
+```{r moran monte-carlo}
+montecarlo<- moran.mc(zupanije$BDP, nb_list, nsim=999, alternative="greater")
+print(montecarlo)
+```
+#### Interpretacija
+Monte-Carlo simulacija dala je 1000 simulacija Moranovog koeficijenta. Dobili smo da je vrijednost koeficijenta blizu nule te se ponovno može zaključiti da je prethodno navedena hipoteza točna. S obzirom da je p-vrijednost 0.332, taj broj predstavlja udio distribucije permutacije koja je ekstremnija od dane statističke vjerojatnosti. 
+
+### Zaključak
+Monte-Carlo simulacija vrlo dobro izračunava Moranov koeficijent s razlikom u vrijednosti tek na sedmoj decimali koeficijenta. Oba načina izračuna daju zaključak da su podaci (BDP po županijama) prostorno nasumično raspršeni.
