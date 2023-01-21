@@ -1,0 +1,56 @@
+---
+title: "dz6"
+author: "Ivana Tus"
+date: "2022-12-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+```
+
+## Prvi zadatak
+
+Grafički prikaz država i administrativnih jedinica u kojima se nalazi London (England, United Kingdom) i Boston (Massachusetts, United States) pomoću GADM podataka.
+```{r uk}
+library(raster)
+UK_Adm_1 <- raster::getData("GADM", country="GBR", level=1)
+k <- subset(UK_Adm_1, NAME_1=="England")
+raster::plot(UK_Adm_1)
+raster::plot(k)
+tailored_layers <- raster::getData('alt', country='GBR', mask=TRUE)
+plot(tailored_layers, main='England',ylab='latitude [deg]', xlab ='longitude [deg]')
+```
+
+
+```{r usa}
+USA_Adm_1 <- raster::getData("GADM", country="USA", level=1)
+k <- subset(USA_Adm_1, NAME_1=="Massachusetts")
+raster::plot(USA_Adm_1)
+raster::plot(k)
+tailored_layers <- raster::getData('alt', country='USA', mask=TRUE)
+#plot(tailored_layers, main='Massachusetts',ylab='latitude [deg]', xlab ='longitude [deg]')
+#vraća grešku: Error in xy.coords(x, y, xlabel, ylabel, log) : 'x' is a list, but does not have components 'x' and 'y'
+```
+## Drugi zadatak
+
+Bilo je potrebno unijeti zadane koordinate u OpenStreetMap Nominatim servis te saznati koji se objekti/područja nalaze na tim koordinatama.
+
+#### N44.977998, E14.738325
+crkva svete Lucije, Jurandvor, Općina Baška, Primorje-Gorski Kotar County, 51523, Croatia
+
+#### N51.501056, W0.177398 
+Tilda, Ferry Lane, Easter Industrial Park, Rainham, London Borough of Havering, London, Greater London, England, RM13 9BP, United Kingdom
+
+#### N39.905712, E116.397589
+East Chang'an Street, Dongcheng District, Beijing, 100010, China
+
+#### N42.358894, W71.057443
+Talas Region, Kyrgyzstan
+
+#### N51.477033, W0.000489
+Greenwich Park, Blackheath Avenue, Royal Borough of Greenwich, London, Greater London, England, SE10 8QY, United Kingdom
+
+#### N45.337713, E14.425806
+Vukovarska 58, Tehnički fakultet Rijeka, Grad Rijeka, Primorje-Gorski Kotar County, 51000, Croatia 
